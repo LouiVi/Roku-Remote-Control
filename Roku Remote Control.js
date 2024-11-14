@@ -21,7 +21,7 @@ speech = app.CreateSpeechRec()
   
  //lay.SetChildMargins( 0.1,0.1,0.1,0.1 );
  
- var commands = ["Vol Up","Speech","Vol Down","","Power On","","Back","","Home","","Up","","Left","Ok","Right","","Down","","Return","Sleep","Menu","Rewind","Play","Forward","Netflix","","Disney","Apple","","Hbo"];
+ var commands = ["Vol Down","Speech","Vol Up","","Power On","","Back","","Home","","Up","","Left","Ok","Right","","Down","","Return","Sleep","Menu","Rewind","Play","Forward","Netflix","","Disney","Apple","","Hbo"];
 apb = MUI.CreateAppBar("Remote Control", "keyboard", "more_vert")
    
              var apbHeight = apb.GetHeight()
@@ -35,6 +35,7 @@ apb = MUI.CreateAppBar("Remote Control", "keyboard", "more_vert")
  {
  if( commands[i] != "") {
   btn = MUI.CreateButtonRaisedO( commands[i], 0.33, -1, MUI.colors.deepPurple.darken1);
+  btn.Animate("Newspaper", null, 1750);
   btn.SetOnTouch(Click);
 
  //btn = app.CreateButton( commands[i], 0.33, -1);
@@ -62,7 +63,7 @@ app.HttpRequest( "GET", "http://" + ROKU_IP + ":8060/query/apps", null, null, ha
 
 function OnChange(value, index)
 {
-    app.ShowPopup(value + " = " + ar2[index]);
+    app.ShowPopup("Launching " + value);
     HandleCommand("launch/"+ar2[index]);
 }
 
@@ -100,6 +101,7 @@ function Click()
 {
 
 var self = this;
+self.Animate("Rubberband", null, 950);
 	if(self.GetText().includes("Power")) btnCurr = self;
 	if(self.GetText() == "Up") HandleCommand(self.GetText().toLowerCase());
 	if(self.GetText() == "Down") HandleCommand(self.GetText().toLowerCase());
