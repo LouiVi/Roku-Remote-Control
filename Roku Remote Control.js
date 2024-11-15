@@ -2,26 +2,32 @@ cfg.MUI, cfg.Light, cfg.Portrait;
 
 app.LoadPlugin( "Support" );
 app.LoadPlugin( "Xml2Js" );
+app.LoadPlugin( "Utils" );
 
 const ROKU_IP = "192.168.70.236";
 var btnCurr;
 
 function OnStart()
 {
+utils = app.CreateUtils();
 plg = app.CreateXml2Js();
 speech = app.CreateSpeechRec()
 	speech.SetOnReady( speech_OnReady )
 	speech.SetOnResult( speech_OnResult )
 	speech.SetOnError( speech_OnError )
+	color3 = MUI.colors.deepPurple.darken4;//"#7d8334";// utils.HexToLighterHex(utils.RandomHexColor(false), 0.74);
+
+color2 = utils.HexToLighterHex(color3, 0.53)
+
 //colorx = MUI.colors.teal
     app.InitializeUIKit(MUI.colors.deepPurple.darken1)
  lay = app.CreateLayout( "Linear", "Top,HCenter,FillXY" );
  //lay.SetChildMargins( 0.1,0.1,0.1,0.1 );
   lay2 = app.CreateLayout( "Linear", "VCenter,FillXY" );
-  
+  lay2.SetBackGradient( utils.GetGradientColors(color2)[1], color2,  utils.GetGradientColors(color2)[0] )
  //lay.SetChildMargins( 0.1,0.1,0.1,0.1 );
  
- var commands = ["Vol Down","Speech","Vol Up","","Power On","","Back","","Home","","Up","","Left","Ok","Right","","Down","","Return","Sleep","Menu","Rewind","Play","Forward","Netflix","","Disney","Apple","","Hbo"];
+ var commands = ["Vol Down","Speech","Vol Up","","Power On","","Back","","Home","","Up","","Left","Ok","Right","","Down","","Return","Sleep","Menu","Rewind","Play","Forward","YouTube","Netflix","Prime","Hulu","Apple TV","HBO"];
 apb = MUI.CreateAppBar("Remote Control", "keyboard", "more_vert")
    
              var apbHeight = apb.GetHeight()
@@ -51,6 +57,11 @@ apb = MUI.CreateAppBar("Remote Control", "keyboard", "more_vert")
 lay.AddChild( lay2 );
 
 spn = MUI.CreateSpinner("", 1, 0.1);
+//alert(color2)
+
+
+spn.SetBackGradient( utils.GetGradientColors(color2)[0], color2,  utils.GetGradientColors(color2)[1]);
+
         spn.SetOnChange(OnChange);
         spn.SetHint("Channels:");
         lay2.AddChild(spn);
@@ -63,6 +74,7 @@ app.HttpRequest( "GET", "http://" + ROKU_IP + ":8060/query/apps", null, null, ha
 
 function OnChange(value, index)
 {
+spn.Animate( "Tada", null, 1200 );
     app.ShowPopup("Launching " + value);
     HandleCommand("launch/"+ar2[index]);
 }
