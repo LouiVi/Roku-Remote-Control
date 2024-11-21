@@ -102,7 +102,11 @@ function OnResult( err, result )
  ar2.push("");
  ar2.push("");*/
  for(a=0;a<result.apps.app.sort().length;a++){
- ar.push(result.apps.app.sort()[a]._);
+ //app.ShowPopup( result.apps.app.sort()[a]._ );
+ if(result.apps.app.sort()[a]._ == "Netflix") Netflix = result.apps.app.sort()[a].$.id;
+if(result.apps.app.sort()[a]._ == "YouTube") YouTube = result.apps.app.sort()[a].$.id;
+
+  ar.push(result.apps.app.sort()[a]._);
  ar2.push(result.apps.app.sort()[a].$.id);
   //app.ShowPopup(result.apps.app[a]._);//.$.id);
   }
@@ -111,7 +115,7 @@ function OnResult( err, result )
 
 function Click()
 {
-
+app.Vibrate( "0,100,30,100,50,300" );
 var self = this;
 self.Animate("Rubberband", null, 950);
 	if(self.GetText().includes("Power")) btnCurr = self;
@@ -120,7 +124,12 @@ self.Animate("Rubberband", null, 950);
 	if(self.GetText() == "Left") HandleCommand(self.GetText().toLowerCase());
 	if(self.GetText() == "Right") HandleCommand(self.GetText().toLowerCase());
 	if(self.GetText() == "Ok") HandleCommand("select");
-	if(self.GetText() == "Menu") HandleCommand("home");
+	if(self.GetText() == "Sleep") HandleCommand("sleep");
+	if(self.GetText() == "Back") HandleCommand("back");
+	if(self.GetText() == "Return") HandleCommand("return");
+	if(self.GetText() == "Play") HandleCommand("play");
+
+		if(self.GetText() == "Menu") HandleCommand("home");
 		if(self.GetText() == "Vol Up") HandleCommand("Vol Up");
 		if(self.GetText() == "Vol Down") HandleCommand("Vol Down");
 		if(self.GetText() == "Power Off") {
@@ -135,7 +144,16 @@ self.Animate("Rubberband", null, 950);
 	btnCurr.SetText("Power Off");
 	}
 		if(self.GetText() == "Speech") StartListening();
-
+	if(self.GetText() == "Netflix") {
+	self.Animate( "Tada", null, 1200 );
+    app.ShowPopup("Launching " + "Netflix");
+    HandleCommand("launch/"+Netflix);
+	}
+	if(self.GetText() == "YouTube") {
+	self.Animate( "Tada", null, 1200 );
+    app.ShowPopup("Launching " + "YouTube");
+    HandleCommand("launch/"+YouTube);
+	}
 
 }
 
@@ -158,8 +176,8 @@ var baseUrl2 = "http://" + ROKU_IP + ":8060/";
         SendCommand(baseUrl + "PowerOn");
     } else if (command.includes("select")) {
         SendCommand(baseUrl + "Select");
-    } else if (command.includes("channel down")) {
-        SendCommand(baseUrl + "ChannelDown");
+    } else if (command.includes("back")) {
+        SendCommand(baseUrl + "Back");
     } else if (command.includes("up")) {
         SendCommand(baseUrl + "Up");
     } else if (command.includes("down")) {
@@ -169,7 +187,13 @@ var baseUrl2 = "http://" + ROKU_IP + ":8060/";
     } else if (command.includes("right")) {
         SendCommand(baseUrl + "Right");
     } else if (command.includes("home")) {
+        SendCommand(baseUrl + "Home");
+     } else if (command.includes("sleep")) {
+        SendCommand(baseUrl + "Sleep");
+      } else if (command.includes("menu")) {
         SendCommand(baseUrl + "Menu");
+      } else if (command.includes("play")) {
+        SendCommand(baseUrl + "Play");
     } else if (command.includes("launch")) {
         SendCommand(baseUrl2 + command); // Example for Netflix, app ID may vary
   /*  } else if (command.includes("camera")) {
