@@ -1,4 +1,4 @@
-cfg.MUI, cfg.Light, cfg.Portrait;
+cfg.MUI, cfg.Light, cfg.Portrait, cfg.Share;
 
 app.LoadPlugin( "Support" );
 app.LoadPlugin( "Xml2Js" );
