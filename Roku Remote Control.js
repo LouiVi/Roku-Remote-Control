@@ -5,6 +5,8 @@ app.LoadPlugin( "Xml2Js" );
 app.LoadPlugin( "Utils" );
 
 const ROKU_IP = "192.168.70.236";
+const TV_CHANNELS = "http://" + ROKU_IP + ":8060/query/tv-channels";
+const TV = "http://" + ROKU_IP + ":8060/launch/tvinput.dtv?ch=";
 var btnCurr;
 
 function OnStart()
@@ -23,11 +25,11 @@ color2 = utils.HexToLighterHex(color3, 0.53)
     app.InitializeUIKit(MUI.colors.deepPurple.darken1)
  lay = app.CreateLayout( "Linear", "Top,HCenter,FillXY" );
  //lay.SetChildMargins( 0.1,0.1,0.1,0.1 );
-  lay2 = app.CreateLayout( "Linear", "VCenter,FillXY" );
+  lay2 = app.CreateLayout( "Linear", "Top,HCenter,FillXY" );
   lay2.SetBackGradient( utils.GetGradientColors(color2)[1], color2,  utils.GetGradientColors(color2)[0] )
  //lay.SetChildMargins( 0.1,0.1,0.1,0.1 );
  
- var commands = ["Vol Down","Speech","Vol Up","","Power On","","Back","","Home","","Up","","Left","Ok","Right","","Down","","Return","Sleep","Menu","Rewind","Play","Forward","YouTube","Netflix","Prime","Hulu","Apple TV","HBO"];
+ var commands = ["","Power Off","","Vol Up","Vol Down","Vol Mute","Back","Speech","Home","","Up","","Left","Ok","Right","","Down","","Return","Sleep","Menu","Rewind","Play","Forward","YouTube","Netflix","Prime","Hulu","Apple TV","HBO"];
 apb = MUI.CreateAppBar("Remote Control", "keyboard", "more_vert")
    
              var apbHeight = apb.GetHeight()
@@ -37,11 +39,16 @@ apb = MUI.CreateAppBar("Remote Control", "keyboard", "more_vert")
  grid = sup.CreateGridLayout();
  grid.SetColCount( 3 );
 
- for( var i=0; i<30; i++ )
+ for( var i=0; i<24; i++ )
  {
  if( commands[i] != "") {
+ if(commands[i] == "Power Off" || commands[i] == "Up" || commands[i] == "Left" || commands[i] == "Down" || commands[i] == "Right"){
+  btn = MUI.CreateButtonRaisedO( commands[i], 0.33, -1, "#ffffff", MUI.colors.deepPurple.darken1);
+  }else{
   btn = MUI.CreateButtonRaisedO( commands[i], 0.33, -1, MUI.colors.deepPurple.darken1);
-  btn.Animate("Newspaper", null, 1750);
+
+  }
+  btn.Animate("Newspaper", null, 2750);
   btn.SetOnTouch(Click);
 
  //btn = app.CreateButton( commands[i], 0.33, -1);
@@ -53,6 +60,9 @@ apb = MUI.CreateAppBar("Remote Control", "keyboard", "more_vert")
  }
 
  lay2.AddChild( grid );
+ web = app.CreateWebView( 1, -1 );
+ web.SetBackAlpha( 256)
+ web.SetBackColor( "#00000000" )
  
 lay.AddChild( lay2 );
 
@@ -65,9 +75,19 @@ spn.SetBackGradient( utils.GetGradientColors(color2)[0], color2,  utils.GetGradi
         spn.SetOnChange(OnChange);
         spn.SetHint("Channels:");
         lay2.AddChild(spn);
+        lay2.AddChild( web );
+        spn2 = MUI.CreateSpinner("", 1, 0.1);
+        lay2.AddChild( spn2 )
+        spn2.SetHint("TV Channels:");
+         spn2.SetOnChange(OnChange2);
+        //web.LoadUrl( TV_CHANNELS);
+        //app.Wait( 10 )
+ 
 
  app.AddLayout( lay );
 app.HttpRequest( "GET", "http://" + ROKU_IP + ":8060/query/apps", null, null, handleReply );
+app.HttpRequest( "GET", TV_CHANNELS, null, null, handleReplyTV);
+
 
 
 }
@@ -77,6 +97,16 @@ function OnChange(value, index)
 spn.Animate( "Tada", null, 1200 );
     app.ShowPopup("Launching " + value);
     HandleCommand("launch/"+ar2[index]);
+}
+
+function OnChange2(value, index)
+{
+spn2.Animate( "Tada", null, 1200 );
+    app.ShowPopup("Launching TV Channel: " + value);
+    //alert(ar4[index])
+   SendCommand(TV + ar4[index]);
+   //app.HttpRequest( "POST", TV + ar4[index], null, null, (error, reply)=>{});
+   // HandleCommand("launch/"+ar2[index]);
 }
 
 
@@ -92,6 +122,18 @@ function handleReply( error, reply )
     }
 }
 
+function handleReplyTV( error, reply )
+{
+    if( error ) alert( reply );
+    else
+    {
+    //alert(reply);
+    plg.ParseString( reply, OnResultTV);
+        //var funfact = reply.slice( reply.indexOf("<i>") + 3, reply.indexOf("</i>") );
+       // alert( funfact );
+    }
+}
+
 function OnResult( err, result )
 {
  // alert( JSON.stringify(result) );
@@ -101,6 +143,11 @@ function OnResult( err, result )
  ar.push("");
  ar2.push("");
  ar2.push("");*/
+ for(e=0;e<3;e++){
+ ar.push("");
+ ar2.push("");
+ }
+ html='<script src="ds:/Sys/app.js"></script>' + app.ReadFile( app.GetAppPath()+"/Script.js" )+'<marquee truespeed>';
  for(a=0;a<result.apps.app.sort().length;a++){
  //app.ShowPopup( result.apps.app.sort()[a]._ );
  if(result.apps.app.sort()[a]._ == "Netflix") Netflix = result.apps.app.sort()[a].$.id;
@@ -108,9 +155,48 @@ if(result.apps.app.sort()[a]._ == "YouTube") YouTube = result.apps.app.sort()[a]
 
   ar.push(result.apps.app.sort()[a]._);
  ar2.push(result.apps.app.sort()[a].$.id);
+ 
+// app.WriteFile( app.GetAppPath()+"/channels.txt", ar.join("\r") );
+ if(!app.FileExists("/storage/emulated/0/Download/"+result.apps.app.sort()[a]._ + ".png"  )) app.DownloadFile( "http://"+ROKU_IP+":8060/query/icon/"+ result.apps.app.sort()[a].$.id, "/storage/emulated/0/Download/"+result.apps.app.sort()[a]._ + ".png", "Downloading ...")
+  html += "<img onClick='HandleCommand(\"launch/"+result.apps.app.sort()[a].$.id+"\")' height='92' hspace='8' src="+"'file:///storage/emulated/0/Download/"+result.apps.app.sort()[a]._ + ".png' />";
   //app.ShowPopup(result.apps.app[a]._);//.$.id);
   }
+  html+="</marquee>";
+  web.LoadHtml( html )
+  app.WriteFile( app.GetAppPath()+"/text.txt", html );
   spn.SetList( ar );
+  app.WriteFile( app.GetAppPath()+"/channelsNames.txt", ar.join("\r") );
+  app.WriteFile( app.GetAppPath()+"/channelsIds.txt", ar2.join("\r") );
+}
+
+function OnResultTV( err, result )
+{
+//alert("tv")
+//alert(JSON.stringify(result["tv-channels"].channel[0].number));
+//alert(JSON.stringify(result.tv-channels));
+ // alert( JSON.stringify(result) );
+ var ar3 = new Array();
+ ar4= new Array();
+ ar5= new Array();
+ /*ar.push("");
+ ar.push("");
+ ar2.push("");
+ ar2.push("");*/
+ for(e=0;e<3;e++){
+ ar3.push("");
+ ar4.push("");
+ ar3.push("");
+ }
+ for(a=0;a<result["tv-channels"].channel.length;a++){
+ //app.ShowPopup( result.apps.app.sort()[a]._ );
+ 
+  ar3.push(result["tv-channels"].channel[a].name);
+ ar4.push(result["tv-channels"].channel[a].number);
+  ar5.push(result["tv-channels"].channel[a].name + " - " + result["tv-channels"].channel[a].number);
+ }
+spn2.SetList( ar5 );
+  app.WriteFile( app.GetAppPath()+"/tvchannelsNames.txt", ar3.join("\r") );
+  app.WriteFile( app.GetAppPath()+"/tvchannelsNumber.txt", ar4.join("\r") );
 }
 
 function Click()
@@ -126,7 +212,7 @@ self.Animate("Rubberband", null, 950);
 	if(self.GetText() == "Ok") HandleCommand("select");
 	if(self.GetText() == "Sleep") HandleCommand("sleep");
 	if(self.GetText() == "Back") HandleCommand("back");
-	if(self.GetText() == "Return") HandleCommand("return");
+	if(self.GetText() == "Return") HandleCommand("instantreplay");
 	if(self.GetText() == "Play") HandleCommand("play");
 
 		if(self.GetText() == "Menu") HandleCommand("home");
@@ -192,6 +278,8 @@ var baseUrl2 = "http://" + ROKU_IP + ":8060/";
         SendCommand(baseUrl + "Sleep");
       } else if (command.includes("menu")) {
         SendCommand(baseUrl + "Menu");
+     } else if (command.includes("instantreplay")) {
+        SendCommand(baseUrl + "InstantReplay");
       } else if (command.includes("play")) {
         SendCommand(baseUrl + "Play");
     } else if (command.includes("launch")) {
