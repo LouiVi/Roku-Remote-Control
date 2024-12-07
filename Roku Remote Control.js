@@ -48,6 +48,7 @@ apb = MUI.CreateAppBar("Remote Control", "keyboard", "more_vert")
   btn = MUI.CreateButtonRaisedO( commands[i], 0.33, -1, MUI.colors.deepPurple.darken1);
 
   }
+  if(commands[i] == "Ok") btn.SetStyle(MUI.colors.deepPurple.lighten3, MUI.colors.deepPurple.darken3, 5, "#343434", 5, 0.25);
   btn.Animate("Newspaper", null, 2750);
   btn.SetOnTouch(Click);
 
@@ -157,8 +158,8 @@ if(result.apps.app.sort()[a]._ == "YouTube") YouTube = result.apps.app.sort()[a]
  ar2.push(result.apps.app.sort()[a].$.id);
  
 // app.WriteFile( app.GetAppPath()+"/channels.txt", ar.join("\r") );
- if(!app.FileExists("/storage/emulated/0/Download/"+result.apps.app.sort()[a]._ + ".png"  )) app.DownloadFile( "http://"+ROKU_IP+":8060/query/icon/"+ result.apps.app.sort()[a].$.id, "/storage/emulated/0/Download/"+result.apps.app.sort()[a]._ + ".png", "Downloading ...")
-  html += "<img onClick='HandleCommand(\"launch/"+result.apps.app.sort()[a].$.id+"\")' height='92' hspace='8' src="+"'file:///storage/emulated/0/Download/"+result.apps.app.sort()[a]._ + ".png' />";
+ //if(!app.FileExists("/storage/emulated/0/Download/"+result.apps.app.sort()[a]._ + ".png"  ))// app.DownloadFile( "http://"+ROKU_IP+":8060/query/icon/"+ result.apps.app.sort()[a].$.id, "/storage/emulated/0/Download/"+result.apps.app.sort()[a]._ + ".png", "Downloading ...")
+  html += "<img onClick='HandleCommand(\"launch/"+result.apps.app.sort()[a].$.id+"\")' height='92' hspace='8' src="+"'http://" + ROKU_IP + ":8060/query/icon/" + result.apps.app.sort()[a].$.id + "' />";
   //app.ShowPopup(result.apps.app[a]._);//.$.id);
   }
   html+="</marquee>";
@@ -282,6 +283,10 @@ var baseUrl2 = "http://" + ROKU_IP + ":8060/";
         SendCommand(baseUrl + "InstantReplay");
       } else if (command.includes("play")) {
         SendCommand(baseUrl + "Play");
+      } else if (command.includes("ok")) {
+        SendCommand(baseUrl + "Ok");
+      } else if (command.includes("okay")) {
+        SendCommand(baseUrl + "Ok");
     } else if (command.includes("launch")) {
         SendCommand(baseUrl2 + command); // Example for Netflix, app ID may vary
   /*  } else if (command.includes("camera")) {
