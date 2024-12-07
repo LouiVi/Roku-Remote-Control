@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+<specVersion>
+<major>1</major>
+<minor>0</minor>
+</specVersion>
+<device>
+<deviceType>urn:roku-com:device:player:1-0</deviceType>
+<friendlyName>32&quot; onn. Roku TV</friendlyName>
+<manufacturer>onn.</manufacturer>
+<manufacturerURL>https://www.onntvsupport.com/</manufacturerURL>
+<modelDescription>Roku Streaming Player Network Media</modelDescription>
+<modelName>D820X</modelName>
+<modelNumber>D820X</modelNumber>
+<modelURL>http://www.roku.com/</modelURL>
+<serialNumber>X007001REYCS</serialNumber>
+<UDN>uuid:280001c0-0000-1000-8001-f03575e08294</UDN>
+<iconList>
+<icon>
+<mimetype>image/png</mimetype>
+<width>360</width>
+<height>219</height>
+<depth>8</depth>
+<url>device-image.png</url>
+</icon>
+</iconList>
+<serviceList>
+<service>
+<serviceType>urn:roku-com:service:ecp:1</serviceType>
+<serviceId>urn:roku-com:serviceId:ecp1-0</serviceId>
+<controlURL></controlURL>
+<eventSubURL></eventSubURL>
+<SCPDURL>ecp_SCPD.xml</SCPDURL>
+</service>
+<service>
+<serviceType>urn:dial-multiscreen-org:service:dial:1</serviceType>
+<serviceId>urn:dial-multiscreen-org:serviceId:dial1-0</serviceId>
+<controlURL></controlURL>
+<eventSubURL></eventSubURL>
+<SCPDURL>dial_SCPD.xml</SCPDURL>
+</service>
+</serviceList>
+</device>
+</root>

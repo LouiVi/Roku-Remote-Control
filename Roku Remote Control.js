@@ -7,6 +7,8 @@ app.LoadPlugin( "Utils" );
 const ROKU_IP = "192.168.70.236";
 const TV_CHANNELS = "http://" + ROKU_IP + ":8060/query/tv-channels";
 const TV = "http://" + ROKU_IP + ":8060/launch/tvinput.dtv?ch=";
+const ROKU_TV = "http://" + ROKU_IP + ":8060/";
+
 var btnCurr;
 
 function OnStart()
@@ -24,15 +26,16 @@ color2 = utils.HexToLighterHex(color3, 0.53)
 //colorx = MUI.colors.teal
     app.InitializeUIKit(MUI.colors.deepPurple.darken1)
  lay = app.CreateLayout( "Linear", "Top,HCenter,FillXY" );
+ app.AddLayout( lay );
  //lay.SetChildMargins( 0.1,0.1,0.1,0.1 );
-  lay2 = app.CreateLayout( "Linear", "Top,HCenter,FillXY" );
+  lay2 = app.CreateLayout( "Linear", "VCenter,FillXY" );
   lay2.SetBackGradient( utils.GetGradientColors(color2)[1], color2,  utils.GetGradientColors(color2)[0] )
  //lay.SetChildMargins( 0.1,0.1,0.1,0.1 );
  
- var commands = ["","Power Off","","Vol Up","Vol Down","Vol Mute","Back","Speech","Home","","Up","","Left","Ok","Right","","Down","","Return","Sleep","Menu","YouTube","Play","Netflix","YouTube","Netflix","Prime","Hulu","Apple TV","HBO"];
-apb = MUI.CreateAppBar("Remote Control", "keyboard", "help,more_vert")
+ var commands = ["","Power Off","Brand","Vol Up","Vol Down","Vol Mute","Back","Speech","Home","","Up","","Left","Ok","Right","","Down","","Return","Sleep","Menu","YouTube","Play","Netflix","YouTube","Netflix","Prime","Hulu","Apple TV","HBO"];
+apb = MUI.CreateAppBar("Remote Control", "power_settings_new", "help")
    apb.SetOnControlTouch((btnTxt, index)=>{alert(btnTxt);});
-  apb.SetOnMenuTouch(()=>{alert('TODO');});
+  apb.SetOnMenuTouch(()=>{SendCommand("http://" + ROKU_IP + ":8060/keypress/Power");});
   
                         var apbHeight = apb.GetHeight()
    lay.AddChild(apb)
@@ -46,23 +49,38 @@ apb = MUI.CreateAppBar("Remote Control", "keyboard", "help,more_vert")
  if( commands[i] != "") {
  if(commands[i] == "Power Off" || commands[i] == "Up" || commands[i] == "Left" || commands[i] == "Down" || commands[i] == "Right"){
   btn = MUI.CreateButtonRaisedO( commands[i], 0.33, -1, "#ffffff", MUI.colors.deepPurple.darken1);
+ 
+ btn.SetFontFile("Misc/Jaro-Regular-VariableFont_opsz.ttf");
+   }else{
+  if(commands[i] == "Brand"){
+  btn = brand = MUI.CreateTextH6("Brand", 0.33, -1, "hcenter", "#000000", "Light");
+  //brand.SetFontFile("Misc/Jaro-Regular-VariableFont_opsz.ttf");
+  brand.SetFontFile("Misc/Rancho-Regular.ttf");
+  }else{
+  if(commands[i] == "Image"){
+  btn =  image = app.CreateWebView( 0.33, -1 );
+  image.LoadHtml( "<center><img width='24' src='" + ROKU_TV + "device-image.png" + "' /></center>" );
+  //CreateImage( ROKU_TV + "device-image.png", 0.33, -1);
+  //btn = image = MUI.CreateTextH6("Image", 0.33, -1, "", "#000000", "Thin");
   }else{
   btn = MUI.CreateButtonRaisedO( commands[i], 0.33, -1, MUI.colors.deepPurple.darken1);
-
+  btn.SetFontFile("Misc/Jaro-Regular-VariableFont_opsz.ttf");//Rancho-Regular.ttf");
+}
+  }
   }
   if(commands[i] == "Ok") btn.SetStyle(MUI.colors.pink.lighten3, MUI.colors.pink.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
   if(commands[i] == "Speech") btn.SetStyle(MUI.colors.cyan.lighten3, MUI.colors.cyan.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
   if(commands[i] == "Back") btn.SetStyle(MUI.colors.lime.lighten3, MUI.colors.lime.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
   if(commands[i] == "Home") btn.SetStyle(MUI.colors.amber.lighten3, MUI.colors.amber.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
     if(commands[i] == "Vol Down") btn.SetStyle(MUI.colors.red.lighten3, MUI.colors.red.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
-  if(commands[i] == "Vol Up") btn.SetStyle(MUI.colors.yellow.lighten3, MUI.colors.yellow.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
+if(commands[i] == "Vol Up") btn.SetStyle(MUI.colors.yellow.lighten3, MUI.colors.yellow.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
   if(commands[i] == "Vol Mute") btn.SetStyle(MUI.colors.green.lighten3, MUI.colors.green.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
     if(commands[i] == "Up") btn.SetStyle(MUI.colors.indigo.lighten3, MUI.colors.indigo.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
   if(commands[i] == "Down") btn.SetStyle(MUI.colors.indigo.lighten3, MUI.colors.indigo.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
   if(commands[i] == "Left") btn.SetStyle(MUI.colors.indigo.lighten3, MUI.colors.indigo.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
    if(commands[i] == "Right") btn.SetStyle(MUI.colors.indigo.lighten3, MUI.colors.indigo.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
     if(commands[i] == "Power Off") btn.SetStyle(MUI.colors.gray.lighten4, MUI.colors.gray.darken1, 5, "#efefef", 1, 1), btn.SetTextColor(MUI.colors.deepPurple.darken4), btn.SetTextShadow(5, 0, 0, "#cecece");
-  btn.Animate("Newspaper", null, 2750);
+  btn.Animate("FallRotate", null, 250*i);
   btn.SetOnTouch(Click);
 
  //btn = app.CreateButton( commands[i], 0.33, -1);
@@ -71,7 +89,8 @@ apb = MUI.CreateAppBar("Remote Control", "keyboard", "help,more_vert")
  btn.SetVisibility( "Gone"  );
  }
   grid.AddChild( btn );
-  btn.SetFontFile("Misc/YujiMai-Regular.ttf");
+  //app.ShowPopup( i )
+  
  }
 
  lay2.AddChild( grid );
@@ -80,6 +99,7 @@ apb = MUI.CreateAppBar("Remote Control", "keyboard", "help,more_vert")
  web.SetBackColor( "#00000000" )
  
 lay.AddChild( lay2 );
+lay2.Animate( "BounceLeft", null, 500 )
 
 spn = MUI.CreateSpinner("", 1, 0.1);
 //alert(color2)
@@ -99,9 +119,10 @@ spn.SetBackGradient( utils.GetGradientColors(color2)[0], color2,  utils.GetGradi
         //app.Wait( 10 )
  
 
- app.AddLayout( lay );
+ 
 app.HttpRequest( "GET", "http://" + ROKU_IP + ":8060/query/apps", null, null, handleReply );
 app.HttpRequest( "GET", TV_CHANNELS, null, null, handleReplyTV);
+app.HttpRequest( "GET", ROKU_TV, null, null, handleReplyROKUTV);
 
 
 
@@ -145,6 +166,24 @@ function handleReplyTV( error, reply )
     //alert(reply);
     plg.ParseString( reply, OnResultTV);
         //var funfact = reply.slice( reply.indexOf("<i>") + 3, reply.indexOf("</i>") );
+       // alert( funfact );
+    }
+}
+
+function handleReplyROKUTV( error, reply )
+{
+    if( error ) alert( reply );
+    else
+    {
+    //alert(reply);
+    plg.ParseString( reply, OnResultROKUTV);
+  //  app.WriteFile( app.GetAppPath()+"/rokutv.txt", reply );
+        var funfact = reply.slice( reply.indexOf("<friendlyName>") + 14, reply.indexOf("</friendlyName>") );
+      brand.SetText(funfact.replace("&quot;",'"'));
+      brand.SetTextSize(13);
+      brand.SetTextColor("#ffffff");
+      brand.SetTextShadow(5, 0, 0, "#000000");
+      
        // alert( funfact );
     }
 }
@@ -214,11 +253,18 @@ spn2.SetList( ar5 );
   app.WriteFile( app.GetAppPath()+"/tvchannelsNumber.txt", ar4.join("\r") );
 }
 
+function OnResultROKUTV( err, result )
+{
+
+//alert(utils.Stringify(result["root"].device));
+//alert(utils.Stringify(result.root));
+
+}
 function Click()
 {
 app.Vibrate( "0,100,30,100,50,300" );
 var self = this;
-self.Animate("Rubberband", null, 950);
+self.Animate("Rubberband", null, 350);
 	if(self.GetText().includes("Power")) btnCurr = self;
 	if(self.GetText() == "Up") HandleCommand(self.GetText().toLowerCase());
 	if(self.GetText() == "Down") HandleCommand(self.GetText().toLowerCase());
@@ -348,6 +394,7 @@ function speech_OnResult( results )
     //Show the top result.
     app.ShowPopup( results[0].toLowerCase());
         app.HideProgress();
+        if(results[0].toLowerCase() == "okay") HandleCommand("ok");
         HandleCommand(results[0].toLowerCase());
 }
 
