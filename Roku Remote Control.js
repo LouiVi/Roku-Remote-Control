@@ -29,15 +29,17 @@ color2 = utils.HexToLighterHex(color3, 0.53)
   lay2.SetBackGradient( utils.GetGradientColors(color2)[1], color2,  utils.GetGradientColors(color2)[0] )
  //lay.SetChildMargins( 0.1,0.1,0.1,0.1 );
  
- var commands = ["","Power Off","","Vol Up","Vol Down","Vol Mute","Back","Speech","Home","","Up","","Left","Ok","Right","","Down","","Return","Sleep","Menu","Rewind","Play","Forward","YouTube","Netflix","Prime","Hulu","Apple TV","HBO"];
-apb = MUI.CreateAppBar("Remote Control", "keyboard", "more_vert")
-   
-             var apbHeight = apb.GetHeight()
+ var commands = ["","Power Off","","Vol Up","Vol Down","Vol Mute","Back","Speech","Home","","Up","","Left","Ok","Right","","Down","","Return","Sleep","Menu","YouTube","Play","Netflix","YouTube","Netflix","Prime","Hulu","Apple TV","HBO"];
+apb = MUI.CreateAppBar("Remote Control", "keyboard", "help,more_vert")
+   apb.SetOnControlTouch((btnTxt, index)=>{alert(btnTxt);});
+  apb.SetOnMenuTouch(()=>{alert('TODO');});
+  
+                        var apbHeight = apb.GetHeight()
    lay.AddChild(apb)
  sup = app.CreateSupport();
  
  grid = sup.CreateGridLayout();
- grid.SetColCount( 3 );
+ grid.SetColCount( 3);
 
  for( var i=0; i<24; i++ )
  {
@@ -48,7 +50,18 @@ apb = MUI.CreateAppBar("Remote Control", "keyboard", "more_vert")
   btn = MUI.CreateButtonRaisedO( commands[i], 0.33, -1, MUI.colors.deepPurple.darken1);
 
   }
-  if(commands[i] == "Ok") btn.SetStyle(MUI.colors.deepPurple.lighten3, MUI.colors.deepPurple.darken3, 5, "#343434", 5, 0.25);
+  if(commands[i] == "Ok") btn.SetStyle(MUI.colors.pink.lighten3, MUI.colors.pink.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
+  if(commands[i] == "Speech") btn.SetStyle(MUI.colors.cyan.lighten3, MUI.colors.cyan.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
+  if(commands[i] == "Back") btn.SetStyle(MUI.colors.lime.lighten3, MUI.colors.lime.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
+  if(commands[i] == "Home") btn.SetStyle(MUI.colors.amber.lighten3, MUI.colors.amber.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
+    if(commands[i] == "Vol Down") btn.SetStyle(MUI.colors.red.lighten3, MUI.colors.red.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
+  if(commands[i] == "Vol Up") btn.SetStyle(MUI.colors.yellow.lighten3, MUI.colors.yellow.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
+  if(commands[i] == "Vol Mute") btn.SetStyle(MUI.colors.green.lighten3, MUI.colors.green.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
+    if(commands[i] == "Up") btn.SetStyle(MUI.colors.indigo.lighten3, MUI.colors.indigo.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
+  if(commands[i] == "Down") btn.SetStyle(MUI.colors.indigo.lighten3, MUI.colors.indigo.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
+  if(commands[i] == "Left") btn.SetStyle(MUI.colors.indigo.lighten3, MUI.colors.indigo.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
+   if(commands[i] == "Right") btn.SetStyle(MUI.colors.indigo.lighten3, MUI.colors.indigo.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
+    if(commands[i] == "Power Off") btn.SetStyle(MUI.colors.gray.lighten4, MUI.colors.gray.darken1, 5, "#efefef", 1, 1), btn.SetTextColor(MUI.colors.deepPurple.darken4), btn.SetTextShadow(5, 0, 0, "#cecece");
   btn.Animate("Newspaper", null, 2750);
   btn.SetOnTouch(Click);
 
@@ -58,6 +71,7 @@ apb = MUI.CreateAppBar("Remote Control", "keyboard", "more_vert")
  btn.SetVisibility( "Gone"  );
  }
   grid.AddChild( btn );
+  btn.SetFontFile("Misc/YujiMai-Regular.ttf");
  }
 
  lay2.AddChild( grid );
@@ -74,12 +88,12 @@ spn = MUI.CreateSpinner("", 1, 0.1);
 spn.SetBackGradient( utils.GetGradientColors(color2)[0], color2,  utils.GetGradientColors(color2)[1]);
 
         spn.SetOnChange(OnChange);
-        spn.SetHint("Channels:");
+        spn.SetHint("Channels (Streaming Apps):");
         lay2.AddChild(spn);
         lay2.AddChild( web );
         spn2 = MUI.CreateSpinner("", 1, 0.1);
         lay2.AddChild( spn2 )
-        spn2.SetHint("TV Channels:");
+        spn2.SetHint("Channels (TV):");
          spn2.SetOnChange(OnChange2);
         //web.LoadUrl( TV_CHANNELS);
         //app.Wait( 10 )
@@ -144,11 +158,11 @@ function OnResult( err, result )
  ar.push("");
  ar2.push("");
  ar2.push("");*/
- for(e=0;e<3;e++){
+ for(e=0;e<6;e++){
  ar.push("");
  ar2.push("");
  }
- html='<script src="ds:/Sys/app.js"></script>' + app.ReadFile( app.GetAppPath()+"/Script.js" )+'<marquee truespeed>';
+ html='<script src="ds:/Sys/app.js"></script>' + app.ReadFile( app.GetAppPath()+"/Script.js" )+'<marquee  direction="left" behavior="alternate" scrolldelay="0.0037" scrollamount="10">';
  for(a=0;a<result.apps.app.sort().length;a++){
  //app.ShowPopup( result.apps.app.sort()[a]._ );
  if(result.apps.app.sort()[a]._ == "Netflix") Netflix = result.apps.app.sort()[a].$.id;
@@ -183,10 +197,10 @@ function OnResultTV( err, result )
  ar.push("");
  ar2.push("");
  ar2.push("");*/
- for(e=0;e<3;e++){
+ for(e=0;e<2;e++){
  ar3.push("");
  ar4.push("");
- ar3.push("");
+ ar5.push("");
  }
  for(a=0;a<result["tv-channels"].channel.length;a++){
  //app.ShowPopup( result.apps.app.sort()[a]._ );
