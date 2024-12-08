@@ -3,15 +3,17 @@ cfg.MUI, cfg.Light, cfg.Portrait, cfg.Share;
 app.LoadPlugin( "Support" );
 app.LoadPlugin( "Xml2Js" );
 app.LoadPlugin( "Utils" );
+app.LoadPlugin( "UIExtras" );
 
-const ROKU_IP = "192.168.70.236";
-const TV_CHANNELS = "http://" + ROKU_IP + ":8060/query/tv-channels";
-const TV = "http://" + ROKU_IP + ":8060/launch/tvinput.dtv?ch=";
-const ROKU_TV = "http://" + ROKU_IP + ":8060/";
+var ROKU_IP = "192.168.157.144";//70.236";
+var TV_CHANNELS = "http://" + ROKU_IP + ":8060/query/tv-channels";
+var TV = "http://" + ROKU_IP + ":8060/launch/tvinput.dtv?ch=";
+var ROKU_TV = "http://" + ROKU_IP + ":8060/";
+var found = false;
 
 var btnCurr;
 
-function OnStart()
+async function OnStart()
 {
 utils = app.CreateUtils();
 plg = app.CreateXml2Js();
@@ -57,9 +59,14 @@ apb = MUI.CreateAppBar("Remote Control", "power_settings_new", "help")
   //brand.SetFontFile("Misc/Jaro-Regular-VariableFont_opsz.ttf");
   brand.SetFontFile("Misc/Rancho-Regular.ttf");
   }else{
-  if(commands[i] == "Image"){
-  btn =  image = app.CreateWebView( 0.33, -1 );
-  image.LoadHtml( "<center><img width='24' src='" + ROKU_TV + "device-image.png" + "' /></center>" );
+  if(commands[i] == "RIP"){
+  btn = ripT = MUI.CreateTextH6("IP", 0.33, -1, "hcenter", "#000000", "Light");
+ripT.SetFontFile("Misc/Rancho-Regular.ttf");
+  ripT.SetTextSize(13);
+      ripT.SetTextColor("#ffffff");
+      ripT.SetTextShadow(5, 0, 0, "#000000");
+  //btn =  image = app.CreateWebView( 0.33, -1 );
+  //image.LoadHtml( "<center><img width='24' src='" + ROKU_TV + "device-image.png" + "' /></center>" );
   //CreateImage( ROKU_TV + "device-image.png", 0.33, -1);
   //btn = image = MUI.CreateTextH6("Image", 0.33, -1, "", "#000000", "Thin");
   }else{
@@ -68,6 +75,7 @@ apb = MUI.CreateAppBar("Remote Control", "power_settings_new", "help")
 }
   }
   }
+  /*
   if(commands[i] == "Ok") btn.SetStyle(MUI.colors.pink.lighten3, MUI.colors.pink.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
   if(commands[i] == "Speech") btn.SetStyle(MUI.colors.cyan.lighten3, MUI.colors.cyan.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
   if(commands[i] == "Back") btn.SetStyle(MUI.colors.lime.lighten3, MUI.colors.lime.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
@@ -79,7 +87,11 @@ if(commands[i] == "Vol Up") btn.SetStyle(MUI.colors.yellow.lighten3, MUI.colors.
   if(commands[i] == "Down") btn.SetStyle(MUI.colors.indigo.lighten3, MUI.colors.indigo.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
   if(commands[i] == "Left") btn.SetStyle(MUI.colors.indigo.lighten3, MUI.colors.indigo.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
    if(commands[i] == "Right") btn.SetStyle(MUI.colors.indigo.lighten3, MUI.colors.indigo.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
+   */
     if(commands[i] == "Power Off") btn.SetStyle(MUI.colors.gray.lighten4, MUI.colors.gray.darken1, 5, "#efefef", 1, 1), btn.SetTextColor(MUI.colors.deepPurple.darken4), btn.SetTextShadow(5, 0, 0, "#cecece");
+      if(commands[i] == "YouTube") btn.SetStyle(MUI.colors.red.lighten3, MUI.colors.red.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
+       if(commands[i] == "Netflix") btn.SetStyle(MUI.colors.gray.lighten4, MUI.colors.gray.lighten2, 5, "#ef0000", 1, 1), btn.SetTextColor(MUI.colors.red.darken1), btn.SetTextShadow(5, 0, 0, "#cdcdcd");
+
   btn.Animate("FallRotate", null, 250*i);
   btn.SetOnTouch(Click);
 
@@ -90,7 +102,6 @@ if(commands[i] == "Vol Up") btn.SetStyle(MUI.colors.yellow.lighten3, MUI.colors.
  }
   grid.AddChild( btn );
   //app.ShowPopup( i )
-  
  }
 
  lay2.AddChild( grid );
@@ -102,6 +113,7 @@ lay.AddChild( lay2 );
 lay2.Animate( "BounceLeft", null, 500 )
 
 spn = MUI.CreateSpinner("", 1, 0.1);
+spn.SetTextSize( 12 )
 //alert(color2)
 
 
@@ -110,15 +122,24 @@ spn.SetBackGradient( utils.GetGradientColors(color2)[0], color2,  utils.GetGradi
         spn.SetOnChange(OnChange);
         spn.SetHint("Channels (Streaming Apps):");
         lay2.AddChild(spn);
-        lay2.AddChild( web );
-        spn2 = MUI.CreateSpinner("", 1, 0.1);
+       
+       uix = app.CreateUIExtras();
+ 
+// spn2 = uix.CreatePicker( "", 0.4 );
+       spn2 = MUI.CreateSpinner("", 1, 0.1);
+       spn2.SetBackGradient( utils.GetGradientColors(color2)[0], color2,  utils.GetGradientColors(color2)[1]);
+
+ lay2.AddChild( web );
+        spn2.SetTextSize( 12 )
         lay2.AddChild( spn2 )
+         
         spn2.SetHint("Channels (TV):");
          spn2.SetOnChange(OnChange2);
         //web.LoadUrl( TV_CHANNELS);
         //app.Wait( 10 )
  
-
+//await GetRokuTVIp();
+await Tween1();
  
 app.HttpRequest( "GET", "http://" + ROKU_IP + ":8060/query/apps", null, null, handleReply );
 app.HttpRequest( "GET", TV_CHANNELS, null, null, handleReplyTV);
@@ -126,6 +147,24 @@ app.HttpRequest( "GET", ROKU_TV, null, null, handleReplyROKUTV);
 
 
 
+}
+function Tween1()
+{
+    target = { x:0.5, y:0.5, sw:0.5, sh:0.5, rot:360 };
+    spn.Tween( target, 2500, "Exponential.Out", 1, true, Tween2 )
+    spn2.Tween( target, 2500, "Exponential.Out", 1, true, Tween3 )
+}
+
+function Tween2()
+{
+    target = { x: 0.8, y:[0.6,0.3,0.6], rot: 360*3 };
+    spn.Tween( spn2, 2000 )
+}
+
+function Tween3()
+{
+    target = { x: 0.8, y:[0.6,0.3,0.6], rot: 360*3 };
+    spn2.Tween( target, 2000 )
 }
 
 function OnChange(value, index)
@@ -394,7 +433,7 @@ function speech_OnResult( results )
     //Show the top result.
     app.ShowPopup( results[0].toLowerCase());
         app.HideProgress();
-        if(results[0].toLowerCase() == "okay") HandleCommand("ok");
+        if(results[0].toLowerCase() == "okay") HandleCommand("Ok");
         HandleCommand(results[0].toLowerCase());
 }
 
@@ -408,4 +447,49 @@ function speech_OnError()
 function speech_OnReady()
 {
    app.ShowPopup( "Listening..." + "Short" )
+}
+
+async function GetRokuTVIp() {
+    ip = app.GetRouterAddress();
+    parts = ip.split(".");
+    size = parts.length;
+    fromNum = parseInt(parts[size - 1]);
+    toNum = 145;
+
+    for (c = toNum; c > fromNum; c--) {
+        if (found) {
+            break;
+        }
+				rIp = `${parts[0]}.${parts[1]}.${parts[2]}.${c}`
+        url = `http://${parts[0]}.${parts[1]}.${parts[2]}.${c}:8060/query/device-info`;
+
+        try {
+            app.ShowPopup(`Checking URL: ${url}`);
+            await sendHttpRequest(url);
+        } catch (error) {
+            app.ShowPopup(`Error at ${url}: ${error}`);
+        }
+    }
+}
+
+function sendHttpRequest(url) {
+    return new Promise((resolve, reject) => {
+        app.HttpRequest("GET", url, null, null, (error, reply, status) => {
+            if (status === 200) {
+                found = true;
+                //txtIp.SetText(url);
+                ripT.SetText(rIp);
+               deviceName = reply.slice( reply.indexOf("<friendly-device-name>") + 22, reply.indexOf("</friendly-device-name>") );
+                ROKU_IP = rIp;//"192.168.70.236";
+TV_CHANNELS = "http://" + ROKU_IP + ":8060/query/tv-channels";
+TV = "http://" + ROKU_IP + ":8060/launch/tvinput.dtv?ch=";
+ROKU_TV = "http://" + ROKU_IP + ":8060/";
+               //txtDN.SetText( deviceName );
+               //app.WriteFile( app.GetAppPath()+"/device-info.txt", reply );
+                resolve(reply);
+            } else {
+                reject(error || "Request failed");
+            }
+        });
+    });
 }
