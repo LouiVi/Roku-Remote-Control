@@ -6,11 +6,12 @@ app.LoadPlugin( "Support" );
 app.LoadPlugin( "Xml2Js" );
 app.LoadPlugin( "Utils" );
 app.LoadPlugin( "UIExtras" );
-
-var ROKU_IP = "192.168.70.236";
+alert(app.GetAppPath());
+var ROKU_IP = app.ReadFile( app.GetAppPath() +  "/Remote.txt" );
 var TV_CHANNELS = "http://" + ROKU_IP + ":8060/query/tv-channels";
 var TV = "http://" + ROKU_IP + ":8060/launch/tvinput.dtv?ch=";
 var ROKU_TV = "http://" + ROKU_IP + ":8060/";
+var ROKU_SEARCH = "http://" + ROKU_IP + ":8060/search/browse/?keyword=";
 var found = false;
 
 var btnCurr;
@@ -28,15 +29,18 @@ async function OnStart()
 	color2 = utils.HexToLighterHex(color3, 0.53);
   app.InitializeUIKit(MUI.colors.deepPurple.darken1);
   lay = app.CreateLayout( "Linear", "Top,HCenter,FillXY" );
-  app.AddLayout( lay );
   lay2 = app.CreateLayout( "Linear", "VCenter,FillXY" );
   lay2.SetBackGradient( utils.GetGradientColors(color2)[1], color2,  utils.GetGradientColors(color2)[0] );
+  
+  app.AddLayout( lay );
+  //await Splash();
   var commands = ["","Power","Brand","Vol Up","Vol Down","Vol Mute","Back","Speech","Home","","Up","","Left","Ok","Right","","Down","","Return","Sleep","Menu","YouTube","Play","Netflix","YouTube","Netflix","Prime","Hulu","Apple TV","HBO"];
-  apb = MUI.CreateAppBar("Remote Control", "power_settings_new", "help");
-  apb.SetOnControlTouch((btnTxt, index)=>{alert(btnTxt);});
+  apb = MUI.CreateAppBar("Remote", "power_settings_new", "search, info");
+  apb.SetOnControlTouch((btnTxt, index)=>{if(index==0) SendCommand(ROKU_SEARCH + prompt("Search for:").split(" ").join("%20"));});
   apb.SetOnMenuTouch(()=>{SendCommand("http://" + ROKU_IP + ":8060/keypress/Power");});
   var apbHeight = apb.GetHeight();
   lay.AddChild(apb);
+  lay.AddChild( lay2 );
   sup = app.CreateSupport();
   grid = sup.CreateGridLayout();
   grid.SetColCount( 3);
@@ -77,10 +81,11 @@ async function OnStart()
 
  lay2.AddChild( grid );
  web = app.CreateWebView( 1, -1 );
- web.SetBackAlpha( 256)
- web.SetBackColor( "#00000000" )
+ web.SetBackAlpha( 256);
+ web.SetBackColor( "#00000000" );
+ web.Animate( "Newspaper", null, 1250 );
  
-lay.AddChild( lay2 );
+
 lay2.Animate( "BounceLeft", null, 500 )
 
 spn = MUI.CreateSpinner("", 1, 0.1);
@@ -118,6 +123,20 @@ app.HttpRequest( "GET", ROKU_TV, null, null, handleReplyROKUTV);
 
 }
 
+async function Splash() {
+	app.SetOrientation( "Landscape");
+	anim = app.CreateVideoView( 1, 1 );
+	anim.SetOnReady( ()=>{anim.Play();} );
+	anim.SetOnComplete( ()=>{} );
+	anim.SetFile( "Misc/Roku Bootup Animation.mp4" );
+	anim.Play();
+	//im = app.CreateImage( "Img/Roku Remote Control.png", 1, 1 );
+	lay2.AddChild( anim );
+	app.Wait( 30, false );
+	lay2.RemoveChild( anim );
+	app.SetOrientation( "Portrait" );
+}
+
 async function OnKey(action, name, code, extra) {
     if(action == "Up"){
     	if(name == "VOLUME_UP"){
@@ -138,7 +157,7 @@ function Tween1()
 function Tween2()
 {
     target = { x: 0.8, y:[0.6,0.3,0.6], rot: 360*3 };
-    spn.Tween( spn2, 2000 )
+    spn.Tween( target, 2000 )
 }
 
 function Tween3()
@@ -220,7 +239,7 @@ function OnResult( err, result )
  ar.push("");
  ar2.push("");
  }
- html='<script src="ds:/Sys/app.js"></script>' + app.ReadFile( app.GetAppPath()+"/Script.js" )+'<marquee  direction="left" behavior="alternate" scrolldelay="0.0037" scrollamount="10">';
+ html='<script src="ds:/Sys/app.js"></script><style>img {-webkit-box-shadow: 2px 2px 2px 3px #666666; box-shadow: 2px 2px 2px 3px #666666; width:64px; height: 64px;}</style>' + app.ReadFile( app.GetAppPath()+"/Script.js" )+'<marquee  direction="left" behavior="alternate" scrolldelay="0.0037" scrollamount="10">';
  for(a=0;a<result.apps.app.sort().length;a++){
  //app.ShowPopup( result.apps.app.sort()[a]._ );
  if(result.apps.app.sort()[a]._ == "Netflix") Netflix = result.apps.app.sort()[a].$.id;
@@ -231,7 +250,7 @@ if(result.apps.app.sort()[a]._ == "YouTube") YouTube = result.apps.app.sort()[a]
  
 // app.WriteFile( app.GetAppPath()+"/channels.txt", ar.join("\r") );
  //if(!app.FileExists("/storage/emulated/0/Download/"+result.apps.app.sort()[a]._ + ".png"  ))// app.DownloadFile( "http://"+ROKU_IP+":8060/query/icon/"+ result.apps.app.sort()[a].$.id, "/storage/emulated/0/Download/"+result.apps.app.sort()[a]._ + ".png", "Downloading ...")
-  html += "<img onClick='HandleCommand(\"launch/"+result.apps.app.sort()[a].$.id+"\")' height='92' hspace='8' src="+"'http://" + ROKU_IP + ":8060/query/icon/" + result.apps.app.sort()[a].$.id + "' />";
+  html += "<img onClick='HandleCommand(\"launch/"+result.apps.app.sort()[a].$.id+"\")' height='92' hspace='8' vspace='5' src="+"'http://" + ROKU_IP + ":8060/query/icon/" + result.apps.app.sort()[a].$.id + "' />";
   //app.ShowPopup(result.apps.app[a]._);//.$.id);
   }
   html+="</marquee>";
@@ -291,10 +310,11 @@ self.Animate("Rubberband", null, 350);
 	if(self.GetText() == "Right") HandleCommand(self.GetText().toLowerCase());
 	if(self.GetText() == "Ok") HandleCommand("select");
 	if(self.GetText() == "Sleep") HandleCommand("sleep");
+	if(self.GetText() == "Menu") HandleCommand("info");
 	if(self.GetText() == "Back") HandleCommand("back");
 	if(self.GetText() == "Return") HandleCommand("instantreplay");
 	if(self.GetText() == "Play") HandleCommand("play");
-	if(self.GetText() == "Menu") HandleCommand("home");
+	if(self.GetText() == "Home") HandleCommand("home");
 		if(self.GetText() == "Power") HandleCommand("power");
 		if(self.GetText() == "Vol Up") HandleCommand("Vol Up");
 		if(self.GetText() == "Vol Down") HandleCommand("Vol Down");
@@ -363,7 +383,9 @@ var baseUrl2 = "http://" + ROKU_IP + ":8060/";
         SendCommand(baseUrl + "Sleep");
       } else if (command.includes("menu")) {
         SendCommand(baseUrl + "Menu");
-     } else if (command.includes("instantreplay")) {
+    } else if (command.includes("info")) {
+        SendCommand(baseUrl + "Info");
+         } else if (command.includes("instantreplay")) {
         SendCommand(baseUrl + "InstantReplay");
       } else if (command.includes("play")) {
         SendCommand(baseUrl + "Play");
