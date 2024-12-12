@@ -1,0 +1,5 @@
+function tvInfo(title, data) {
+	var template = "<fieldset>" + "	<legend>[TITLE]</legend>" + "	<h4>[VALUE]</h4>" + "</fieldset>";
+	var results = template.replace([TITLE], title.toUpperCase()).replace([DATA], data.slice( data.indexOf("<"+title+">")+title.length+2, data.indexOf("</"+title+">")));
+	return results;
+}

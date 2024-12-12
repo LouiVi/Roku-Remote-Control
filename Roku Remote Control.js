@@ -6,8 +6,8 @@ app.LoadPlugin( "Support" );
 app.LoadPlugin( "Xml2Js" );
 app.LoadPlugin( "Utils" );
 app.LoadPlugin( "UIExtras" );
-alert(app.GetAppPath());
-var ROKU_IP = app.ReadFile( app.GetAppPath() +  "/Remote.txt" );
+//alert(app.GetAppPath());
+var ROKU_IP = app.ReadFile( "Remote.txt" );
 var TV_CHANNELS = "http://" + ROKU_IP + ":8060/query/tv-channels";
 var TV = "http://" + ROKU_IP + ":8060/launch/tvinput.dtv?ch=";
 var ROKU_TV = "http://" + ROKU_IP + ":8060/";
@@ -15,6 +15,17 @@ var ROKU_SEARCH = "http://" + ROKU_IP + ":8060/search/browse/?keyword=";
 var found = false;
 
 var btnCurr;
+
+function tvInfo(title, data) {
+	var template = "<fieldset>" + "	<legend>[TITLE]</legend>" + "	<h6>[VALUE]</h6>" + "</fieldset>";
+	var results = template.replace("[TITLE]", title.toUpperCase()).replace("[VALUE]", data.slice( data.indexOf("<"+title+">")+title.length+2, data.indexOf("</"+title+">")));
+	return results;
+}
+
+function tvInfo2(title, data) {
+	var results = data.slice( data.indexOf("<"+title+">")+title.length+2, data.indexOf("</"+title+">"));
+	return results;
+}
 
 async function OnStart()
 {
@@ -28,15 +39,15 @@ async function OnStart()
 	color3 = MUI.colors.deepPurple.darken4;
 	color2 = utils.HexToLighterHex(color3, 0.53);
   app.InitializeUIKit(MUI.colors.deepPurple.darken1);
-  lay = app.CreateLayout( "Linear", "Top,HCenter,FillXY" );
+  lay = layMain = app.CreateLayout( "Linear", "Top,HCenter,FillXY" );
   lay2 = app.CreateLayout( "Linear", "VCenter,FillXY" );
   lay2.SetBackGradient( utils.GetGradientColors(color2)[1], color2,  utils.GetGradientColors(color2)[0] );
   
   app.AddLayout( lay );
   //await Splash();
   var commands = ["","Power","Brand","Vol Up","Vol Down","Vol Mute","Back","Speech","Home","","Up","","Left","Ok","Right","","Down","","Return","Sleep","Menu","YouTube","Play","Netflix","YouTube","Netflix","Prime","Hulu","Apple TV","HBO"];
-  apb = MUI.CreateAppBar("Remote", "power_settings_new", "search, info");
-  apb.SetOnControlTouch((btnTxt, index)=>{if(index==0) SendCommand(ROKU_SEARCH + prompt("Search for:").split(" ").join("%20"));});
+  apb = MUI.CreateAppBar("Roku Remote", "power_settings_new", "search, info");
+  apb.SetOnControlTouch((btnTxt, index)=>{if(index==0) {SendCommand(ROKU_SEARCH + prompt("Search for:").split(" ").join("%20"));}else{dlg.Show();}});
   apb.SetOnMenuTouch(()=>{SendCommand("http://" + ROKU_IP + ":8060/keypress/Power");});
   var apbHeight = apb.GetHeight();
   lay.AddChild(apb);
@@ -115,12 +126,36 @@ spn.SetBackGradient( utils.GetGradientColors(color2)[0], color2,  utils.GetGradi
         //app.Wait( 10 )
  
 //await GetRokuTVIp();
+
+//wiz = app.CreateWizard( "Device Info: ", 0.87, 0.87, OnWizard );
+dlg = app.CreateDialog( "Device Info: " );
+
+    layDlg = app.CreateLayout( "linear", "Top,HCenter,FillXY" );
+    layDlg.SetSize( 0.87, 0.43 );
+    dlg.AddLayout( layDlg );
+webCopy= app.CreateWebView( 1, -1 );
+ webCopy.SetBackAlpha( 256);
+ webCopy.SetBackColor( "#00000000" );
+    //chk = app.CreateCheckBox( "Check Box" );
+    //chk.SetMargins( 0, 0.02, 0, 0.02 );
+    layDlg.AddChild( webCopy );
+
+    btnDlg = app.CreateButton( "Close Dialog", 0.6, 0.1 );
+    btnDlg.SetOnTouch( btnDlg_OnTouch );
+    layDlg.AddChild( btnDlg );
+
 await Tween1();
  
 app.HttpRequest( "GET", "http://" + ROKU_IP + ":8060/query/apps", null, null, handleReply );
 app.HttpRequest( "GET", TV_CHANNELS, null, null, handleReplyTV);
 app.HttpRequest( "GET", ROKU_TV, null, null, handleReplyROKUTV);
+si = setInterval(RokuAnim, 750);
+}
 
+function RokuAnim(){
+ co = color.GetRandomColor();
+ brand.SetTextColor(co);
+ brand.Animate("Rubberband", null, 450);
 }
 
 async function Splash() {
@@ -146,6 +181,12 @@ async function OnKey(action, name, code, extra) {
     	}
     }
 }
+
+function btnDlg_OnTouch()
+{
+    dlg.Dismiss();
+}
+
 
 function Tween1()
 {
@@ -217,6 +258,10 @@ function handleReplyROKUTV( error, reply )
     plg.ParseString( reply, OnResultROKUTV);
   //  app.WriteFile( app.GetAppPath()+"/rokutv.txt", reply );
         var funfact = reply.slice( reply.indexOf("<friendlyName>") + 14, reply.indexOf("</friendlyName>") );
+        
+      //  alert( '<img  src="' +ROKU_TV + tvInfo2("url", reply) + '" />' + tvInfo("friendlyName", reply) + "<br />" + tvInfo("modelDescription", reply));
+        
+        webCopy.LoadHtml(  "<div style='overflow:scroll;'><img  src='" +ROKU_TV + tvInfo2("url", reply) + "' />" + tvInfo("friendlyName", reply) + "<br />" + tvInfo("modelDescription", reply)+"</div>");
       brand.SetText(funfact.replace("&quot;",'"').replace("32", "32"));
       brand.SetTextSize(13);
       brand.SetTextColor("#ffffff");
@@ -255,6 +300,7 @@ if(result.apps.app.sort()[a]._ == "YouTube") YouTube = result.apps.app.sort()[a]
   }
   html+="</marquee>";
   web.LoadHtml( html )
+  webCopy.LoadHtml( html )
   app.WriteFile( app.GetAppPath()+"/text.txt", html );
   spn.SetList( ar );
   app.WriteFile( app.GetAppPath()+"/channelsNames.txt", ar.join("\r") );
@@ -499,4 +545,49 @@ ROKU_TV = "http://" + ROKU_IP + ":8060/";
             }
         });
     });
+}
+
+function OnWizard( lay, page )
+{
+    switch( page ) {
+    case 0:
+        wizTxt = app.CreateText( "", -1, -1, "MultiLine" );
+        wizTxt.SetTextSize( 19 );
+        lay.AddChild( wizTxt );
+
+        wizFlag = app.CreateText( "[fa-flag-checkered]", -1, -1, "FontAwesome" );
+        wizFlag.SetMargins( 0, 0.05, 0, 0 );
+        wizFlag.SetTextSize( 64 );
+        wizFlag.Gone();
+        lay.AddChild( wizFlag );
+    break;
+
+    case 1:
+        var msg = "This is the first page of your wizard";
+        wizTxt.SetText( msg );
+    break;
+
+    case 2:
+    		lay.RemoveChild( wizTxt )
+        lay.AddChild( layMain );
+        //var msg = "You can put any controls you like here, including"
+            + " a webview and have as many pages as you like";
+        //wizTxt.SetText( "" /*msg*/ );
+        wizFlag.Gone();
+    break;
+
+    case 3:
+        wizTxt.SetText( "Wizard complete!" );
+        wizFlag.Show();
+        wiz.Finish();
+    break;
+
+    case 4:
+        wiz.Dismiss();
+        app.ShowPopup( "Wizard finished" );
+    break;
+
+    case -1:
+        app.ShowPopup( "Wizard cancelled" );
+    }
 }
