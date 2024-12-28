@@ -6,12 +6,14 @@ app.LoadPlugin( "Support" );
 app.LoadPlugin( "Xml2Js" );
 app.LoadPlugin( "Utils" );
 app.LoadPlugin( "UIExtras" );
+//app.LoadPlugin( "UIExtras" );
 //alert(app.GetAppPath());
 var ROKU_IP = app.ReadFile( "Remote.txt" );
 var TV_CHANNELS = "http://" + ROKU_IP + ":8060/query/tv-channels";
 var TV = "http://" + ROKU_IP + ":8060/launch/tvinput.dtv?ch=";
 var ROKU_TV = "http://" + ROKU_IP + ":8060/";
 var ROKU_SEARCH = "http://" + ROKU_IP + ":8060/search/browse/?keyword=";
+var TV_ACTIVE_APP = "http://" + ROKU_IP + ":8060/query/tv-active-channel";
 var found = false;
 
 var btnCurr;
@@ -29,6 +31,7 @@ function tvInfo2(title, data) {
 
 async function OnStart()
 {
+	
 	app.SetOnKey( OnKey );
 	utils = app.CreateUtils();
 	plg = app.CreateXml2Js();
@@ -39,6 +42,7 @@ async function OnStart()
 	color3 = MUI.colors.deepPurple.darken4;
 	color2 = utils.HexToLighterHex(color3, 0.53);
   app.InitializeUIKit(MUI.colors.deepPurple.darken1);
+  utils.SetTheme(MUI.colors.deepPurple.lighten1);
   lay = layMain = app.CreateLayout( "Linear", "Top,HCenter,FillXY" );
   lay2 = app.CreateLayout( "Linear", "VCenter,FillXY" );
   lay2.SetBackGradient( utils.GetGradientColors(color2)[1], color2,  utils.GetGradientColors(color2)[0] );
@@ -77,7 +81,7 @@ async function OnStart()
 				}
 			}
   }
-  if(commands[i] == "Power") btn.SetStyle(MUI.colors.gray.lighten4, MUI.colors.gray.darken1, 5, "#efefef", 1, 1), btn.SetTextColor(MUI.colors.deepPurple.darken4), btn.SetTextShadow(5, 0, 0, "#cecece");
+  if(commands[i] == "Power") btn.SetStyle(MUI.colors.gray.darken4, MUI.colors.gray.darken1, 5, "#efefef", 1, 1), btn.SetTextColor(MUI.colors.deepPurple.lighten4), btn.SetTextShadow(5, 0, 0, MUI.colors.deepPurple.darken4);
   if(commands[i] == "YouTube") btn.SetStyle(MUI.colors.red.lighten3, MUI.colors.red.darken3, 5, "#efefef", 1, 0.5), btn.SetTextColor("#ffffff"), btn.SetTextShadow(5, 0, 0, "#000000");
   if(commands[i] == "Netflix") btn.SetStyle(MUI.colors.gray.lighten4, MUI.colors.gray.lighten2, 5, "#ef0000", 1, 1), btn.SetTextColor(MUI.colors.red.darken1), btn.SetTextShadow(5, 0, 0, "#cdcdcd");
   btn.Animate("Jelly", null, 350*i);
@@ -91,6 +95,11 @@ async function OnStart()
  }
 
  lay2.AddChild( grid );
+ 
+ tabs = app.CreateTabs( "Streaming Apps,TV Channels", 1, -1, "HCenter" );
+    lay2.AddChild( tabs );
+    tab1 = tabs.GetLayout( "Streaming Apps" );
+    tab2 = tabs.GetLayout( "TV Channels" );
  web = app.CreateWebView( 1, -1 );
  web.SetBackAlpha( 256);
  web.SetBackColor( "#00000000" );
@@ -98,7 +107,7 @@ async function OnStart()
  
 
 lay2.Animate( "BounceLeft", null, 500 )
-
+/*
 spn = MUI.CreateSpinner("", 1, 0.1);
 spn.SetTextSize( 12 )
 //alert(color2)
@@ -108,20 +117,15 @@ spn.SetBackGradient( utils.GetGradientColors(color2)[0], color2,  utils.GetGradi
 
         spn.SetOnChange(OnChange);
         spn.SetHint("Channels (Streaming Apps):");
-        lay2.AddChild(spn);
+        
+        */
+        
+tab1.AddChild( web );
        
-       uix = app.CreateUIExtras();
+      // uix = app.CreateUIExtras();
  
 // spn2 = uix.CreatePicker( "", 0.4 );
-       spn2 = MUI.CreateSpinner("", 1, 0.1);
-       spn2.SetBackGradient( utils.GetGradientColors(color2)[0], color2,  utils.GetGradientColors(color2)[1]);
-
- lay2.AddChild( web );
-        spn2.SetTextSize( 12 )
-        lay2.AddChild( spn2 )
-         
-        spn2.SetHint("Channels (TV):");
-         spn2.SetOnChange(OnChange2);
+       
         //web.LoadUrl( TV_CHANNELS);
         //app.Wait( 10 )
  
@@ -150,12 +154,16 @@ app.HttpRequest( "GET", "http://" + ROKU_IP + ":8060/query/apps", null, null, ha
 app.HttpRequest( "GET", TV_CHANNELS, null, null, handleReplyTV);
 app.HttpRequest( "GET", ROKU_TV, null, null, handleReplyROKUTV);
 si = setInterval(RokuAnim, 750);
+
+app.HttpRequest( "GET", TV_ACTIVE_APP, null, null, handleActiveTVChannel );
+
 }
 
 function RokuAnim(){
  co = color.GetRandomColor();
  brand.SetTextColor(co);
  brand.Animate("Rubberband", null, 450);
+ utils.SetTheme(co);//utils.RandomHexColor(true));
 }
 
 async function Splash() {
@@ -190,15 +198,19 @@ function btnDlg_OnTouch()
 
 function Tween1()
 {
+/*
     target = { x:0.5, y:0.5, sw:0.5, sh:0.5, rot:360 };
     spn.Tween( target, 2500, "Exponential.Out", 1, true, Tween2 )
     spn2.Tween( target, 2500, "Exponential.Out", 1, true, Tween3 )
+    */
 }
 
 function Tween2()
 {
-    target = { x: 0.8, y:[0.6,0.3,0.6], rot: 360*3 };
+ /*
+       target = { x: 0.8, y:[0.6,0.3,0.6], rot: 360*3 };
     spn.Tween( target, 2000 )
+    */
 }
 
 function Tween3()
@@ -209,21 +221,127 @@ function Tween3()
 
 function OnChange(value, index)
 {
-spn.Animate( "Tada", null, 1200 );
-    app.ShowPopup("Launching " + value);
-    HandleCommand("launch/"+ar2[index]);
+		question = "You want to change the Roku device to " + value + "?";
+		app.TextToSpeech( question, 1, 1,  ()=>{if(confirm(question)) {
+			spn.Animate( "RubberBand", null, 1200 );
+    	app.ShowPopup("Launching " + value);
+    	HandleCommand("launch/"+ar2[index]);
+    } else {
+    	spn.Animate("FallRotate", null, 850);
+    }})
+		
 }
 
+var TV_ACTIVE_APP = "http://" + ROKU_IP + ":8060/query/tv-active-channel";;
+
+function handleActiveTVChannel( error, reply )
+{
+//alert("handle");
+    if( error ) alert( reply );
+    else
+    {
+        active_tv_channel = parseFloat(reply.slice( reply.indexOf("<number>") + 8, reply.indexOf("</number>")) );
+        
+    }
+}
 function OnChange2(value, index)
 {
+question = "Do you want to change your Roku device to " + value + "?";
+		app.TextToSpeech( question, 1, 1,  ()=>{if(confirm(question)) {
+
 spn2.Animate( "Tada", null, 1200 );
+spinChan2 = parseFloat(ar4[index]);
     app.ShowPopup("Launching TV Channel: " + value);
     //alert(ar4[index])
-   SendCommand(TV + ar4[index]);
+    //app.HttpRequest( "POST", TV + ar4[index], null, null, (error, reply)=>{});
+  //alert(TV + ar4[index]);
+  //HandleCommand("launch/"+"tvinput.dtv");
+    //SendCommand(TV + ar4[index]);
+    //app.Wait( 2, false );
+    app.HttpRequest( "GET", TV_ACTIVE_APP, null, null, handleActiveTVChannel );
+   }});
    //app.HttpRequest( "POST", TV + ar4[index], null, null, (error, reply)=>{});
    // HandleCommand("launch/"+ar2[index]);
 }
 
+function handleReplyActiveChannel( error, reply )
+{
+    if( error ) alert( reply );
+    else
+    {
+    //app.HttpRequest( "GET", TV_ACTIVE_APP, null, null, handleReplyActiveChannel );
+    //alert(reply);
+    //plg.ParseString( reply, OnResult );
+        funfact = parseFloat(reply.slice( reply.indexOf("<number>") + 8, reply.indexOf("</number>") ));
+        l = app.ReadFile( "tvchannelsNumber.txt").split("\n");
+        l.forEach((item, index) => {
+        //alert(item);
+    if (item.includes(spinChan2)) {
+        //result.push(index);
+        cha1 = index;
+    }
+    if (item.includes(funfact)) {
+        //result.push(index);
+        cha2 = index;
+    }
+});
+
+//alert("Cha1"+cha1);
+//alert("Cha2"+cha2);
+        /*for(a=0;a<l.lenght;a++){
+        if(parseFloat(l[a])==spinChan2) cha1 = a;
+        if(parseFloat(l[a])==funfact) cha2 = a;
+        }*/
+       app.HttpRequest( "GET", TV_ACTIVE_APP, null, null, handleActiveTVChannel);
+       if(spinChan2 < funfact){
+       cha3 = cha2 - cha1;
+       //alert(cha3);
+       //for(b=0;b<cha3;b++){
+       //app.Wait( 1, false );
+       	RepeatCommand("ChannelDown", cha3);
+       	//alert("");
+       	//}
+       }else{
+       cha3 = cha1 - cha2;
+       //app.Wait(1, false);
+       RepeatCommand("ChannelUp", cha3);
+       }
+       app.HttpRequest( "GET", TV_ACTIVE_APP, null, null, handleReplyActiveChannel );
+       }
+       
+       //alert( funfact );
+    
+}
+
+function RepeatCommand(comm, times)
+{
+app.HttpRequest( "GET", TV_ACTIVE_APP, null, null, handleActiveTVChannel);
+app.WriteFile( "logChange.txt", Date().toString()+", " + comm + "," + times+"\r", "Append" )
+app.Wait(2, false);
+while(active_tv_channel != spinChan2){
+if(spinChan2 == funfact){
+ alert("Fin");
+ break;
+ }
+url = "http://192.168.70.236:8060/keypress/"+comm;
+	var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    
+    xhr.onload = function() {
+    //alert(xhr.responseText);
+        /*if (xhr.status == 200)
+        app.ShowPopup("Command sent successfully!")
+        else
+       
+            app.ShowPopup("Fail to send comm: "+url);
+            
+            app.WriteFile( "log.txt", Date().toString()+", " + xhr.status + "," + url+"\r", "Append" )*/
+    };
+    xhr.send();
+    //ounter+=1;
+    app.Wait( 1, false );
+    }
+}
 
 function handleReply( error, reply )
 {
@@ -281,11 +399,13 @@ function OnResult( err, result )
  ar2.push("");
  ar2.push("");*/
  for(e=0;e<6;e++){
- ar.push("");
- ar2.push("");
+ //ar.push("");
+ //ar2.push("");
  }
+ var stri = "";
  html='<script src="ds:/Sys/app.js"></script><style>img {-webkit-box-shadow: 2px 2px 2px 3px #666666; box-shadow: 2px 2px 2px 3px #666666; width:64px; height: 64px;}</style>' + app.ReadFile( app.GetAppPath()+"/Script.js" )+'<marquee  direction="left" behavior="alternate" scrolldelay="0.0037" scrollamount="10">';
  for(a=0;a<result.apps.app.sort().length;a++){
+ stri += '<option value="' + result.apps.app.sort()[a].$.id +'">' + result.apps.app.sort()[a]._ + '</option>';
  //app.ShowPopup( result.apps.app.sort()[a]._ );
  if(result.apps.app.sort()[a]._ == "Netflix") Netflix = result.apps.app.sort()[a].$.id;
 if(result.apps.app.sort()[a]._ == "YouTube") YouTube = result.apps.app.sort()[a].$.id;
@@ -298,13 +418,31 @@ if(result.apps.app.sort()[a]._ == "YouTube") YouTube = result.apps.app.sort()[a]
   html += "<img onClick='HandleCommand(\"launch/"+result.apps.app.sort()[a].$.id+"\")' height='92' hspace='8' vspace='5' src="+"'http://" + ROKU_IP + ":8060/query/icon/" + result.apps.app.sort()[a].$.id + "' />";
   //app.ShowPopup(result.apps.app[a]._);//.$.id);
   }
+  app.WriteFile( "selectchannels.html", stri );
   html+="</marquee>";
   web.LoadHtml( html )
   webCopy.LoadHtml( html )
   app.WriteFile( app.GetAppPath()+"/text.txt", html );
-  spn.SetList( ar );
+  //spn.SetList( ar );
+  
+  uix= app.CreateUIExtras();
+ 
+ spn = uix.CreatePicker( ar.join(","), 0.95, -1 );
+ spn.SetOnChange( OnChange );
+ spn.SetTextSize( 12 );
+ spn.SetBackGradient("#efefef", "#cdcdcd", "#ffffff"  );
+ //spn.SetOnTouch( spn_OnTouch )
+spn.SetTextColor(MUI.colors.deepPurple.darken1 );
+
+        tab1.AddChild(spn);
   app.WriteFile( app.GetAppPath()+"/channelsNames.txt", ar.join("\r") );
   app.WriteFile( app.GetAppPath()+"/channelsIds.txt", ar2.join("\r") );
+}
+
+function spn_OnTouch()
+{
+	self = this;
+	self.Animate("Newspaper", null, 345);
 }
 
 function OnResultTV( err, result )
@@ -321,18 +459,31 @@ function OnResultTV( err, result )
  ar2.push("");
  ar2.push("");*/
  for(e=0;e<2;e++){
- ar3.push("");
+ /*ar3.push("");
  ar4.push("");
- ar5.push("");
+ ar5.push("");*/
  }
+ var stri = "";
  for(a=0;a<result["tv-channels"].channel.length;a++){
  //app.ShowPopup( result.apps.app.sort()[a]._ );
- 
+ stri += '<option value="' + result["tv-channels"].channel[a].number +'">' + result["tv-channels"].channel[a].name + '</option>';
   ar3.push(result["tv-channels"].channel[a].name);
  ar4.push(result["tv-channels"].channel[a].number);
   ar5.push(result["tv-channels"].channel[a].name + " - " + result["tv-channels"].channel[a].number);
  }
-spn2.SetList( ar5 );
+ app.WriteFile( "select.html", stri );
+spn2 = uix.CreatePicker( ar5.join(","), 0.95, -1 );
+ spn2.SetOnChange( OnChange2 );
+spn2.SetTextColor(MUI.colors.deepPurple.darken1 );
+//spn2 = MUI.CreateSpinner(ar5.join(","), 1, 0.1);
+       //spn2.SetBackGradient( utils.GetGradientColors(MUI.colors.teal.darken1)[0], MUI.colors.teal.darken1,  utils.GetGradientColors(MUI.colors.teal.darken1)[1]);
+spn2.SetBackGradient("#efefef", "#cdcdcd", "#ffffff"  );
+ 
+        spn2.SetTextSize( 12 )
+        tab2.AddChild( spn2 )
+         
+        //spn2.SetHint("Channels (TV):");
+         //spn2.SetOnChange(OnChange2);
   app.WriteFile( app.GetAppPath()+"/tvchannelsNames.txt", ar3.join("\r") );
   app.WriteFile( app.GetAppPath()+"/tvchannelsNumber.txt", ar4.join("\r") );
 }
@@ -397,6 +548,9 @@ var baseUrl2 = "http://" + ROKU_IP + ":8060/";
 
     if (command.includes("volume up")) {
         SendCommand(baseUrl + "VolumeUp");
+         } else if (command.includes("down")) {
+        SendCommand(baseUrl + "Down");
+    
     } else if (command.includes("volume down")) {
         SendCommand(baseUrl + "VolumeDown");
    } else if (command.includes("Vol Down")) {
@@ -417,9 +571,7 @@ var baseUrl2 = "http://" + ROKU_IP + ":8060/";
         SendCommand(baseUrl + "Back");
     } else if (command.includes("up")) {
         SendCommand(baseUrl + "Up");
-    } else if (command.includes("down")) {
-        SendCommand(baseUrl + "Down");
-     } else if (command.includes("left")) {
+    } else if (command.includes("left")) {
         SendCommand(baseUrl + "Left");
     } else if (command.includes("right")) {
         SendCommand(baseUrl + "Right");
@@ -451,22 +603,44 @@ var baseUrl2 = "http://" + ROKU_IP + ":8060/";
 
 // Function to send a command via HTTP to Roku
 function SendCommand(url) {
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    
+    xhr.onload = function() {
+    //alert(xhr.responseText);
+        if (xhr.status == 200)
+        v = 1, app.ShowPopup("Command sent successfully!")
+        else
+       /* if(url.includes("PowerOn")) {
+        btnCurr.SetText("Power Off");
+        }else if(url.includes("PowerOff")){
+        btnCurr.SetText("Power On");
+        }*/
+        
+            alert("Fail to send comm: "+url);
+            
+            app.WriteFile( "log.txt", Date().toString()+", " + xhr.status + "," + url+"\r", "Append" )
+    };
+    xhr.send();
+}
+
+function SendCommand2(url) {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
     xhr.send();
     xhr.onload = function() {
     //alert(xhr.responseText);
         if (xhr.status == 200)
-        v = 1
-           // app.ShowPopup("Command sent successfully!");
+        v = 1, app.ShowPopup("Command sent successfully!")
         else
-        if(url.includes("PowerOn")) {
+        /*if(url.includes("PowerOn")) {
         btnCurr.SetText("Power Off");
         }else if(url.includes("PowerOff")){
         btnCurr.SetText("Power On");
-        }
-        
-            //app.ShowPopup("Fail to send comm: "+url);
+        }*/
+         app.WriteFile( "log.txt", Date().toString()+", " + xhr.status + "," + url+"\r", "Append" )
+            alert("Fail to send comm: "+url);
     };
 }
 
@@ -475,6 +649,7 @@ function SendCommand(url) {
 function StartListening() {
 	speech.Recognize();
     app.ShowProgress("Listening...");
+     app.WriteFile( "log.txt", Date().toString()+", " + "Speech"+ "," + "Command"+"\r", "Append" )
 }
 
 function speech_OnResult( results )
@@ -486,7 +661,11 @@ function speech_OnResult( results )
     //Show the top result.
     app.ShowPopup( results[0].toLowerCase());
         app.HideProgress();
-        if(results[0].toLowerCase() == "okay") HandleCommand("Ok");
+        app.WriteFile( "log.txt", Date().toString()+", " + "Speech"+ "," + results[0].toLowerCase() +"\r", "Append" )
+
+        if(results[0].toLowerCase() == "okay") 
+        HandleCommand("select")
+        else
         HandleCommand(results[0].toLowerCase());
 }
 
