@@ -31,7 +31,7 @@ function tvInfo2(title, data) {
 
 async function OnStart()
 {
-	
+	if(!app.FileExists( "Remote.txt")) app.ExtractAssets( "Remote.txt", app.GetAppPath()+"files/Remote.txt", false)
 	app.SetOnKey( OnKey );
 	utils = app.CreateUtils();
 	plg = app.CreateXml2Js();
@@ -253,7 +253,7 @@ spn2.Animate( "Tada", null, 1200 );
 spinChan2 = parseFloat(ar4[index]);
     app.ShowPopup("Launching TV Channel: " + value);
     //alert(ar4[index])
-    //app.HttpRequest( "POST", TV + ar4[index], null, null, (error, reply)=>{});
+    app.HttpRequest( "POST", TV + ar4[index], null, "ch="+ar4[index], (error, reply)=>{});
   //alert(TV + ar4[index]);
   //HandleCommand("launch/"+"tvinput.dtv");
     //SendCommand(TV + ar4[index]);
