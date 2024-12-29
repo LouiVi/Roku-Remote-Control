@@ -31,7 +31,7 @@ function tvInfo2(title, data) {
 
 async function OnStart()
 {
-	if(!app.FileExists( "Remote.txt")) app.ExtractAssets( "Remote.txt", app.GetAppPath()+"files/Remote.txt", false)
+	if(!app.FileExists( "/storage/emulated/0/​Android/data/com.luillosoftinc.rokuremotecontrol/files/Remote.txt")) app.ExtractAssets( "Remote.txt", app.GetAppPath()+"/storage/emulated/0/​Android/data/com.luillosoftinc.rokuremotecontrol/files/Remote.txt", false)
 	app.SetOnKey( OnKey );
 	utils = app.CreateUtils();
 	plg = app.CreateXml2Js();
