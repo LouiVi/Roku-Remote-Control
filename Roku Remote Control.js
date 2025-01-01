@@ -156,7 +156,7 @@ app.HttpRequest( "GET", ROKU_TV, null, null, handleReplyROKUTV);
 si = setInterval(RokuAnim, 750);
 
 app.HttpRequest( "GET", TV_ACTIVE_APP, null, null, handleActiveTVChannel );
-
+HandleCommand("launch/CL9D5D");
 }
 
 function RokuAnim(){
@@ -603,7 +603,7 @@ var baseUrl2 = "http://" + ROKU_IP + ":8060/";
 
 // Function to send a command via HTTP to Roku
 function SendCommand(url) {
-
+alert(url);
     var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
     
